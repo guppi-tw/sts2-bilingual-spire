@@ -57,6 +57,7 @@ internal static class NeowProgressionSmokeTest
             choice.Call("OnRelease");
             await WaitUntil(() => Descendants(game).OfType<NRewardButton>().Any(b => b.IsVisibleInTree()), "relic reward opens");
             var reward = Descendants(game).OfType<NRewardButton>().First(b => b.IsVisibleInTree());
+            await RelicTitleSmokeTest.Run(reward);
             reward.Call("OnRelease");
             await WaitUntil(() => layout.OptionButtons.Any(b => b.Option.IsProceed), "Neow completes after collecting the relic");
             await Settle(1.1);

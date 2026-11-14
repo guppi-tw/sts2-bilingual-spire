@@ -45,6 +45,7 @@ internal static class StorySmokeTest
                     Require(layout is not null && layout.OptionButtons.Any(), $"{model.Id}: actual event layout initialized");
                     var labels = Descendants(layout!).OfType<Control>().Where(c => c is MegaLabel or MegaRichTextLabel)
                         .Where(c => !string.IsNullOrWhiteSpace(LiveText.GetText(c))).ToArray();
+                    var readability = ReadabilityAudit.Capture(layout!);
                     var optionGeometry = EventOptionSmokeTest.Capture(layout!);
                     var english = labels.ToDictionary(c => c, c => LiveText.GetText(c)!);
                     LanguageSwitcher.SwitchTo("jpn");
@@ -56,6 +57,7 @@ internal static class StorySmokeTest
                     await Settle(0.15);
                     foreach (var label in changed)
                         Require(SecondaryTextSmokeTest.WithoutSize(LiveText.GetText(label)!) == LiveText.Combine(english[label], japanese[label], label is RichTextLabel), $"{model.Id}/{label.Name}: both complete translations in paragraph order");
+                    ReadabilityAudit.Report(model.Id.Entry, readability);
                     CheckLayout(model.Id.Entry, layout!);
                     await Screenshot(model.Id.Entry.ToLowerInvariant());
                     EventOptionSmokeTest.Check(optionGeometry);

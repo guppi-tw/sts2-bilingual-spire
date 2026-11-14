@@ -55,6 +55,9 @@ internal static class BilingualFonts
         }
         if (control is Label sized && state.MaxLines is not null)
         {
+            // Compact names share a line. Let the native width-based auto-sizing handle them;
+            // the title's container may still have a temporary height during hover-tip setup.
+            if (LiveText.UsesInlineTitle(control)) return;
             if (control.Name == "TypeLabel")
             {
                 sized.AddThemeFontSizeOverride("font_size", state.FontSize);

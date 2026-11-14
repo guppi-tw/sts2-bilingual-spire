@@ -203,6 +203,8 @@ internal static class SmokeTest
         var game = NGame.Instance!;
         var scene = game.MainMenu!;
         LanguageSwitcher.SwitchTo("eng");
+        await Frame();
+        var readability = ReadabilityAudit.Capture(game);
         var english = cards.Select(c => (c.Model.Title, Description(c.Model))).ToArray();
         var englishEvent = examples[1].Source.GetFormattedText();
         await Press(Key.F8);
@@ -234,6 +236,7 @@ internal static class SmokeTest
         await Frame();
         foreach (var (_, view) in cards) SecondaryTextSmokeTest.Check(view.GetNode<MegaRichTextLabel>("%DescriptionLabel"));
         SecondaryTextSmokeTest.Check(newView.GetNode<MegaRichTextLabel>("%DescriptionLabel"));
+        ReadabilityAudit.Report("menus/cards", readability);
         var typeLabel = newView.GetNode<MegaLabel>("%TypeLabel");
         var plaque = newView.GetNode<Control>("%TypePlaque");
         Require(Math.Abs(typeLabel.GetGlobalRect().GetCenter().X - plaque.GetGlobalRect().GetCenter().X) < 2, "Bilingual card type stays centered on its plaque");

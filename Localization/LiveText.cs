@@ -4,6 +4,7 @@ using System.Text;
 using Godot;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Nodes.HoverTips;
 using MegaCrit.Sts2.addons.mega_text;
 
 namespace BilingualSpire.Localization;
@@ -90,6 +91,15 @@ internal static class LiveText
     internal static string CombineFor(Control control, string first, string second) => ParagraphText.Combine(first, second,
         control is RichTextLabel, SecondaryTextStyle.AppliesTo(control) ? SecondaryTextStyle.FontSize(control) : null);
 
+    internal static bool UsesInlineTitle(Control control)
+    {
+        if (Bindings.TryGetValue(control, out var binding) && binding.Recipe.IsRelicTitle) return true;
+        if (control.Name != "Title") return false;
+        for (var parent = control.GetParent(); parent is not null; parent = parent.GetParent())
+            if (parent is NHoverTipSet) return true;
+        return false;
+    }
+
     internal static void RefreshControl(Control control)
     {
         if (!Bindings.TryGetValue(control, out var binding) || GetText(control) != binding.LastText) return;
@@ -108,7 +118,7 @@ internal static class LiveText
         var first = ScopedLocale.Render(LanguageSwitcher.Preferences.First, recipe.Render);
         var second = ScopedLocale.Render(LanguageSwitcher.Preferences.Second, recipe.Render);
         if (first == second) return first;
-        return control.Name == "TypeLabel" ? $"{first} / {second}" : CombineFor(control, first, second);
+        return control.Name == "TypeLabel" || UsesInlineTitle(control) ? $"{first} / {second}" : CombineFor(control, first, second);
     }
 
     private static void Apply(Control control, Binding binding)
@@ -228,6 +238,7 @@ internal static class LiveText
 
     private abstract record TextRecipe
     {
+        public virtual bool IsRelicTitle => false;
         public abstract string Render();
     }
 
@@ -263,6 +274,8 @@ internal static class LiveText
 
     private sealed record Localized(string Table, string Key, Dictionary<string, object> Values, bool Raw) : TextRecipe
     {
+        public override bool IsRelicTitle => Table == "relics"
+            && (Key.EndsWith(".title", StringComparison.Ordinal) || Key == "TOY_BOX.waxRelicPrefix");
         public override string Render()
         {
             var source = new LocString(Table, Key);
