@@ -26,7 +26,7 @@ public static class ModEntry
             harmony.UnpatchAll(harmony.Id);
             throw;
         }
-        Logger.Info("BilingualSpire v0.5.4 loaded successfully");
+        Logger.Info("BilingualSpire v0.5.5 loaded successfully");
         LanguageSwitcher.Start();
 #if DEBUG
         if (Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_SMOKE_TEST") == "1")

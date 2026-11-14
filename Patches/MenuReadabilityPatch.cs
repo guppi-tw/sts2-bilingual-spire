@@ -60,6 +60,15 @@ internal static class MenuReadabilityPatch
             {
                 foreach (var original in originals.AsEnumerable().Reverse()) original.Restore();
                 Originals.Remove(owner);
+                // Text may have changed language before this deferred restore. Recompute
+                // content size instead of retaining the previous bilingual text bounds.
+                if (owner is NMainMenuTextButton restoredMenu)
+                {
+                    var label = restoredMenu.GetChild<Label>(0);
+                    label.ResetSize();
+                    CenterLabel(label);
+                }
+                else owner.GetNode<HBoxContainer>("HBoxContainer").ResetSize();
             }
             return;
         }
@@ -111,7 +120,15 @@ internal static class MenuReadabilityPatch
 
     private static void FitButton(Control owner, Label label)
     {
+        // A font/text resize can arrive before the deferred layout pass on re-entry.
+        // Save the native button dimensions before this callback expands them.
+        if (!Originals.TryGetValue(owner, out _)) Originals.Add(owner, [Geometry.Capture(owner), Geometry.Capture(label)]);
         owner.CustomMinimumSize = new Vector2(Math.Max(200, label.Size.X + 32), Math.Max(50, label.Size.Y + 8));
+        CenterLabel(label);
+    }
+
+    private static void CenterLabel(Label label)
+    {
         label.OffsetLeft = -label.Size.X / 2;
         label.OffsetRight = label.Size.X / 2;
         label.OffsetTop = -label.Size.Y / 2;

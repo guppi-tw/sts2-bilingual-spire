@@ -53,7 +53,7 @@ internal sealed class LanguageOverlay
         _languages = LanguagePreferences.Languages;
         _first = AddLanguageRow(rows, "言語 1");
         _second = AddLanguageRow(rows, "言語 2");
-        rows.AddChild(new Label { Text = "F8  言語1 → 言語2 → 両方表示\nF9  この設定を開閉\n表示モードと言語は次回起動にも引き継ぎます\n本体の言語変更は「言語1」に反映します\n反応しない場合は fn キーも押してください", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        rows.AddChild(new Label { Text = "F7  押している間だけ言語2（母国語）を表示\n離すと元の表示に戻ります\nF8  言語1 → 言語2 → 両方表示\nF9  この設定を開閉\n表示モードと言語は次回起動にも引き継ぎます\n本体の言語変更は「言語1」に反映します\n反応しない場合は fn キーも押してください", AutowrapMode = TextServer.AutowrapMode.WordSmart });
         var actions = new HBoxContainer();
         rows.AddChild(actions);
         var toggle = new Button { Text = "今すぐ切り替え", SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };

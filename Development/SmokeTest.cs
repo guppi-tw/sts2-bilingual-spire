@@ -26,6 +26,13 @@ internal static class SmokeTest
             ParagraphSmokeTest.Run();
             if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_TEST_PHASE") is { } phase && phase != "full")
             {
+                if (phase == "hold")
+                {
+                    await HoldTranslationSmokeTest.Run();
+                    ModEntry.Logger.Info("SMOKE TEST PASS: hold-to-translate, release, focus loss, persistence and manual changes");
+                    game.GetTree().Quit(0);
+                    return;
+                }
                 if (phase == "readability")
                 {
                     await ReadabilitySmokeTest.Run();

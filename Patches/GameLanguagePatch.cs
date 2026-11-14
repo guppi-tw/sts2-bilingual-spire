@@ -11,6 +11,7 @@ internal static class GameLanguagePatch
 {
     private static void Prefix(NDropdownItem __0, out string? __state)
     {
+        if (__0 is NLanguageDropdownItem) LanguageSwitcher.EndPeek();
         __state = __0 is NLanguageDropdownItem item && item.LanguageCode != LocManager.Instance.Language
             ? item.LanguageCode : null;
     }
