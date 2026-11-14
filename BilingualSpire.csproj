@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="local.props" Condition="Exists('local.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>0.5.0</Version>
+    <Sts2Path Condition="'$(Sts2Path)' == ''">$(HOME)/Library/Application Support/Steam/steamapps/common/Slay the Spire 2</Sts2Path>
+    <Sts2Architecture Condition="'$(Sts2Architecture)' == ''">arm64</Sts2Architecture>
+    <Sts2DataDir>$(Sts2Path)/SlayTheSpire2.app/Contents/Resources/data_sts2_macos_$(Sts2Architecture)</Sts2DataDir>
+    <NoWarn>$(NoWarn);MSB3270</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="sts2">
+      <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GodotSharp">
+      <HintPath>$(Sts2DataDir)/GodotSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <None Update="BilingualSpire.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CheckGamePath" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(Sts2DataDir)/sts2.dll')"
+           Text="Slay the Spire 2 was not found at $(Sts2DataDir). Set Sts2Path in local.props." />
+  </Target>
+
+  <Target Name="DeployMod" DependsOnTargets="Build">
+    <PropertyGroup>
+      <ModInstallDir>$(Sts2Path)/SlayTheSpire2.app/Contents/MacOS/mods/BilingualSpire</ModInstallDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(ModInstallDir)" />
+    <Copy SourceFiles="$(TargetPath);$(TargetDir)BilingualSpire.json;$(TargetDir)BilingualSpire.pdb"
+          DestinationFolder="$(ModInstallDir)" />
+    <Message Text="Installed BilingualSpire: $(ModInstallDir)" Importance="high" />
+  </Target>
+</Project>
