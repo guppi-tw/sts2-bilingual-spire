@@ -128,9 +128,13 @@ internal static class NeowProgressionSmokeTest
     {
         var tree = NGame.Instance!.GetTree();
         Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = true });
+        Input.FlushBufferedEvents();
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
         Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = false });
+        Input.FlushBufferedEvents();
+        await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+        await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
         await Settle(0.15);
     }
 

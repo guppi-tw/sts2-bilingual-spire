@@ -9,7 +9,7 @@ internal static class SecondaryTextStyle
     internal static bool AppliesTo(Control control)
     {
         if (control is not RichTextLabel) return false;
-        if (control.Name == "BilingualLegendText") return true;
+        if (control.Name == "BilingualLegendText" || control.Name == "BilingualCardDescription") return true;
         for (var parent = control.GetParent(); parent is not null; parent = parent.GetParent())
             if (parent is NCard or NEventLayout) return true;
         return false;

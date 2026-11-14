@@ -93,6 +93,7 @@ internal static class LiveText
 
     internal static bool UsesInlineTitle(Control control)
     {
+        if (Patches.MenuReadabilityPatch.IsMenuLabel(control)) return true;
         if (Bindings.TryGetValue(control, out var binding) && binding.Recipe.IsRelicTitle) return true;
         if (control.Name != "Title") return false;
         for (var parent = control.GetParent(); parent is not null; parent = parent.GetParent())

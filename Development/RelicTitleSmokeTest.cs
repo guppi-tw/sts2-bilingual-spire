@@ -72,7 +72,7 @@ internal static class RelicTitleSmokeTest
     {
         var first = ScopedLocale.Render(LanguageSwitcher.Preferences.First, source.GetFormattedText);
         var second = ScopedLocale.Render(LanguageSwitcher.Preferences.Second, source.GetFormattedText);
-        Require(actual == (first == second ? first : first + " / " + second), "Relic title shows selected languages side by side: " + actual);
+        Require(actual == (first == second ? first : first + " / " + second), "Relic title shows selected languages side by side: " + actual + " expected " + first + " / " + second);
     }
 
     private static void LogSize(MegaLabel label, string where) => ModEntry.Logger.Info(

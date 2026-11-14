@@ -86,6 +86,7 @@ internal static class LanguageSwitcher
         }
         var updated = LiveText.Refresh();
         Patches.CardRefreshPatch.Refresh();
+        Patches.CardHoverPatch.Refresh();
         Patches.EventLayoutPatch.Refresh();
         Patches.MapLegendPatch.Refresh();
         try { Patches.AncientBannerPatch.Refresh(); }

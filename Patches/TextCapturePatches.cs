@@ -40,4 +40,6 @@ internal static class LabelTextPatch
         try { __0 = LiveText.Prepare(__instance, __0); }
         catch (Exception error) { LiveText.Report(error); }
     }
+
+    private static void Postfix(Control __instance) => MenuReadabilityPatch.QueueRefresh(__instance);
 }

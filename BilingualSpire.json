@@ -3,7 +3,7 @@
   "name": "Bilingual Spire",
   "author": "guppi-tw",
   "description": "F8で言語1・言語2・両方表示を切り替えます。F9でゲーム収録言語から2つ選択できます。",
-  "version": "v0.5.3",
+  "version": "v0.5.4",
   "min_game_version": "0.113.0",
   "has_pck": false,
   "has_dll": true,

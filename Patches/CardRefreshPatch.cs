@@ -13,7 +13,7 @@ namespace BilingualSpire.Patches;
 [HarmonyPatch(typeof(NCard), nameof(NCard.UpdateVisuals))]
 internal static class CardRefreshPatch
 {
-    private sealed record DisplayState(PileType Pile, CardPreviewMode Preview);
+    private sealed record DisplayState(PileType Pile, CardPreviewMode Preview, Creature? Target);
     private static readonly ConditionalWeakTable<NCard, DisplayState> Cards = new();
 
     private static void Postfix(NCard __instance, PileType pileType, CardPreviewMode previewMode,
@@ -21,7 +21,8 @@ internal static class CardRefreshPatch
     {
         if (!__instance.IsNodeReady()) return;
         Cards.Remove(__instance);
-        Cards.Add(__instance, new(pileType, previewMode));
+        Cards.Add(__instance, new(pileType, previewMode, ____previewTarget));
+        CardHoverPatch.Refresh(__instance);
         if (__instance.Visibility != ModelVisibility.Visible || __instance.Model is not { } model) return;
         try
         {
@@ -31,6 +32,13 @@ internal static class CardRefreshPatch
                 ? model.GetDescriptionForUpgradePreview() : model.GetDescriptionForPile(pileType, target))}[/center]");
         }
         catch (Exception error) { LiveText.Report(error); }
+    }
+
+    internal static string Description(NCard card)
+    {
+        if (!Cards.TryGetValue(card, out var state) || card.Model is not { } model) return "";
+        return state.Preview == CardPreviewMode.Upgrade ? model.GetDescriptionForUpgradePreview()
+            : model.GetDescriptionForPile(state.Pile, state.Target ?? model.CurrentTarget);
     }
 
     internal static void Refresh()

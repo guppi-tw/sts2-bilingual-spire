@@ -20,10 +20,19 @@ internal static class SmokeTest
         try
         {
             await LanguageSwitcher.Ready;
+            // Deliver synthetic press/release events separately even when a frame stalls.
+            Input.UseAccumulatedInput = false;
             await Frame();
             ParagraphSmokeTest.Run();
             if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_TEST_PHASE") is { } phase && phase != "full")
             {
+                if (phase == "readability")
+                {
+                    await ReadabilitySmokeTest.Run();
+                    ModEntry.Logger.Info("SMOKE TEST PASS: card hover and menu readability");
+                    game.GetTree().Quit(0);
+                    return;
+                }
                 if (phase == "neow")
                 {
                     await NeowProgressionSmokeTest.Run();
