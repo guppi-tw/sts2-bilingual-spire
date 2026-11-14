@@ -76,7 +76,7 @@ try:
         text = log_file.read_text(errors="replace") if log_file.exists() else ""
         print(f"{phase}: game exit code {result.returncode}", flush=True)
         for line in text.splitlines():
-            if any(marker in line for marker in ("SMOKE TEST", "STORY PASS", "PARAGRAPH PASS", "GAME LANGUAGE PASS", "NEOW PROGRESSION PASS", "MAP LEGEND PASS", "RELIC TITLE PASS", "READABILITY PASS", "HOLD TRANSLATION PASS")):
+            if any(marker in line for marker in ("SMOKE TEST", "STORY PASS", "PARAGRAPH PASS", "GAME LANGUAGE PASS", "NEOW PROGRESSION PASS", "MAP LEGEND PASS", "RELIC TITLE PASS", "READABILITY PASS", "HOLD TRANSLATION PASS", "DEFAULT MODE PASS")):
                 print(line, flush=True)
         if (result.returncode != 0 or "SMOKE TEST PASS:" not in text or "[ERROR]" in text or "ERROR: System." in text
                 or "Steam initialization skipped" not in text or "Steamworks initialization succeeded" in text):

@@ -65,6 +65,8 @@ internal static class SmokeTest
                 game.GetTree().Quit(0);
                 return;
             }
+            await CheckFirstLaunch();
+            LanguageSwitcher.SwitchTo("jpn");
             var savedLanguage = SaveManager.Instance.SettingsSave.Language;
             var menu = game.MainMenu;
             Require(menu is not null, "Main menu is ready");
@@ -82,7 +84,7 @@ internal static class SmokeTest
             }
             CheckCards(cards);
             var originalJapanese = cards[0].View.GetNode<MegaLabel>("%TitleLabel").Text;
-            Require(originalJapanese == "ストライク", "Initial Japanese text");
+            Require(originalJapanese == "ストライク", "Japanese fixture text");
 
             var examples = new List<(LocString Source, Label Label)>();
             foreach (var tableName in new[] { "events", "relics", "static_hover_tips", "main_menu_ui" })
@@ -326,6 +328,33 @@ internal static class SmokeTest
             Require(description.Text == expected, $"{model.Id}: description in {LocManager.Instance.Language}: {description.Text} != {expected}");
             Require(!description.Text.Contains('{'), $"{model.Id}: no unresolved format variables");
         }
+    }
+
+    private static async Task CheckFirstLaunch()
+    {
+        Require(!File.Exists(LanguagePreferences.ConfigPath), "First-launch fixture has no saved mod preferences");
+        Require(LocManager.Instance.Language == "eng" && !LanguageSwitcher.IsBilingual,
+            "First launch starts in the learning language even when the game language is Japanese");
+        var game = NGame.Instance!;
+        var view = NCard.Create(ModelDb.AllCards.First(c => c.Id.Entry == "STRIKE_IRONCLAD").ToMutable())!;
+        game.AddChild(view);
+        view.UpdateVisuals(PileType.None, CardPreviewMode.Normal);
+        var title = view.GetNode<MegaLabel>("%TitleLabel");
+        Require(title.Text == "Strike", "First-launch card is in English");
+        await KeyDown(Key.F7);
+        Require(title.Text == "ストライク" && LanguageSwitcher.IsPeeking, "Default controls show Japanese while F7 is held");
+        await KeyUp(Key.F7);
+        await Frame();
+        Require(title.Text == "Strike" && !LanguageSwitcher.IsPeeking, "Default controls return to English on release");
+        Require(!File.Exists(LanguagePreferences.ConfigPath) && SaveManager.Instance.SettingsSave.Language == "jpn",
+            "The initial default and temporary translation do not overwrite native or mod settings");
+        LanguageSwitcher.SetPair("fra", "kor");
+        Require(LocManager.Instance.Language == "fra" && LanguagePreferences.Load().Mode == DisplayMode.First,
+            "Choosing a language pair on first launch immediately displays its learning language");
+        LanguageSwitcher.SetPair("eng", "jpn");
+        view.QueueFree();
+        await Frame();
+        ModEntry.Logger.Info("DEFAULT MODE PASS: first launch in English, hold F7 for Japanese, release to English; native settings unchanged");
     }
 
     private static IEnumerable<Node> Descendants(Node node)

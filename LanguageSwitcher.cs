@@ -27,6 +27,9 @@ internal static class LanguageSwitcher
     {
         await NGame.Instance!.GameStartupComplete;
         Preferences = LanguagePreferences.Load();
+        var hasSavedMode = Preferences.Mode is not null;
+        var mode = Preferences.Mode ?? DisplayMode.First;
+        Preferences = Preferences with { Mode = mode };
         Overlay = new LanguageOverlay();
         Overlay.Attach(NGame.Instance);
         var window = NGame.Instance.GetWindow();
@@ -39,17 +42,17 @@ internal static class LanguageSwitcher
             catch (Exception error) { ReportShortcutError(error); }
         };
         NGame.Instance.GetTree().ProcessFrame += ProcessInput;
-        if (Preferences.Mode is { } mode)
+        try
         {
-            try { SetDisplay(mode == DisplayMode.Second ? Preferences.Second : Preferences.First,
-                mode == DisplayMode.Bilingual, save: false); }
-            catch (Exception error)
-            {
-                ModEntry.Logger.Warn($"Could not restore display mode: {error}");
-                Overlay.ShowStatus("表示モードを復元できませんでした。F8 / F9で選び直せます", 7);
-            }
+            SetDisplay(mode == DisplayMode.Second ? Preferences.Second : Preferences.First,
+                mode == DisplayMode.Bilingual, save: false);
         }
-        if (Preferences.Mode is null) Overlay.ShowStatus("F7  長押しで翻訳   ·   F8  表示切り替え   ·   F9  言語設定", 7);
+        catch (Exception error)
+        {
+            ModEntry.Logger.Warn($"Could not restore display mode: {error}");
+            Overlay.ShowStatus("表示モードを復元できませんでした。F8 / F9で選び直せます", 7);
+        }
+        if (!hasSavedMode) Overlay.ShowStatus("F7  長押しで翻訳   ·   F8  表示切り替え   ·   F9  言語設定", 7);
         ModEntry.Logger.Info($"Language switcher ready: {Preferences.First} / {Preferences.Second}; F7 hold to peek, F8 toggle, F9 settings");
     }
 
