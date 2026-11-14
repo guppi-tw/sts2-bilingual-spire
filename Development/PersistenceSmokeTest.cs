@@ -34,12 +34,12 @@ internal static class PersistenceSmokeTest
         var title = view.GetNode<MegaLabel>("%TitleLabel").Text;
         Require(title == (expected == DisplayMode.Bilingual ? "Strike\nストライク" : expected == DisplayMode.First ? "Strike" : "ストライク"), $"New card uses restored display mode: {title}");
         var next = expected switch { DisplayMode.Bilingual => DisplayMode.First, DisplayMode.First => DisplayMode.Second, _ => DisplayMode.Bilingual };
-        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = true });
+        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.C, Keycode = Key.C, Pressed = true });
         await game.ToSignal(game.GetTree(), SceneTree.SignalName.ProcessFrame);
         await game.ToSignal(game.GetTree(), SceneTree.SignalName.ProcessFrame);
-        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = false });
-        Require(LanguagePreferences.Load().Mode == next, "F8 saved the next mode for another process");
-        Require(LanguageSwitcher.IsBilingual == (next == DisplayMode.Bilingual), "F8 changed the live display mode");
+        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.C, Keycode = Key.C, Pressed = false });
+        Require(LanguagePreferences.Load().Mode == next, "C saved the next mode for another process");
+        Require(LanguageSwitcher.IsBilingual == (next == DisplayMode.Bilingual), "C changed the live display mode");
         ModEntry.Logger.Info($"SMOKE TEST PASS: {phase} restored {expected} in a fresh process, card title={title.Replace('\n', '/')}");
     }
 

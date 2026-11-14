@@ -66,11 +66,11 @@ internal static class NeowProgressionSmokeTest
             for (var mode = 0; mode < 4; mode++)
             {
                 var expected = mode % 3 == 0 ? DisplayMode.Bilingual : mode == 1 ? DisplayMode.First : DisplayMode.Second;
-                Require(LanguagePreferences.Load().Mode == expected, $"F8 reached mode {expected}");
+                Require(LanguagePreferences.Load().Mode == expected, $"C reached mode {expected}");
                 var proceed = layout.OptionButtons.Single(b => b.Option.IsProceed);
                 await Screenshot($"neow-completed-{mode}");
                 CheckVisible(proceed, layout, $"Proceed after relic reward, mode {mode}");
-                if (mode < 3) await PressF8();
+                if (mode < 3) await PressModeKey();
             }
             layout.OptionButtons.Single(b => b.Option.IsProceed).Call("OnRelease");
             await Settle(0.6);
@@ -88,7 +88,7 @@ internal static class NeowProgressionSmokeTest
             resumedProceed.Call("OnRelease");
             await Settle(0.6);
             Require(run.GlobalUi.MapScreen.IsOpen && run.GlobalUi.MapScreen.IsTravelEnabled, "Resumed event also opens the map");
-            ModEntry.Logger.Info("NEOW PROGRESSION PASS: Small Capsule reward, both relics, visible Proceed through the F8 cycle, map opened, completed event resumed");
+            ModEntry.Logger.Info("NEOW PROGRESSION PASS: Small Capsule reward, both relics, visible Proceed through the C cycle, map opened, completed event resumed");
         }
         finally
         {
@@ -124,14 +124,14 @@ internal static class NeowProgressionSmokeTest
         await game.ToSignal(game.GetTree().CreateTimer(seconds), SceneTreeTimer.SignalName.Timeout);
     }
 
-    private static async Task PressF8()
+    private static async Task PressModeKey()
     {
         var tree = NGame.Instance!.GetTree();
-        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = true });
+        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.C, Keycode = Key.C, Pressed = true });
         Input.FlushBufferedEvents();
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
-        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = false });
+        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.C, Keycode = Key.C, Pressed = false });
         Input.FlushBufferedEvents();
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);

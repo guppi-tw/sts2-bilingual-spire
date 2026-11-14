@@ -47,11 +47,11 @@ internal static class GameLanguageSmokeTest
                 "Single-language mode follows the user's game language choice");
             Require(view.GetNode<MegaLabel>("%TitleLabel").Text == card.Title && !card.Title.Contains('\n'), "Single-language card uses the chosen language");
             LanguageSwitcher.Toggle();
-            Require(LocManager.Instance.Language == "eng" && LanguagePreferences.Load().Mode == DisplayMode.Second, "F8 cycle continues with the synchronized second language");
+            Require(LocManager.Instance.Language == "eng" && LanguagePreferences.Load().Mode == DisplayMode.Second, "C cycle continues with the synchronized second language");
             LanguageSwitcher.Toggle();
-            Require(LanguageSwitcher.IsBilingual && LanguagePreferences.Load().Mode == DisplayMode.Bilingual, "F8 returns to bilingual mode");
-            Require(SaveManager.Instance.SettingsSave.Language == "kor", "F8 does not overwrite the game's saved language");
-            ModEntry.Logger.Info("GAME LANGUAGE PASS: native settings action, pair swapping, new language, existing/new cards, persistence and F8 cycle");
+            Require(LanguageSwitcher.IsBilingual && LanguagePreferences.Load().Mode == DisplayMode.Bilingual, "C returns to bilingual mode");
+            Require(SaveManager.Instance.SettingsSave.Language == "kor", "C does not overwrite the game's saved language");
+            ModEntry.Logger.Info("GAME LANGUAGE PASS: native settings action, pair swapping, new language, existing/new cards, persistence and C cycle");
         }
         finally
         {

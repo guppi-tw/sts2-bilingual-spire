@@ -16,17 +16,17 @@ internal static class MapLegendSmokeTest
         await Screenshot("bilingual");
         for (var i = 0; i < 3; i++)
         {
-            Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = true });
+            Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.C, Keycode = Key.C, Pressed = true });
             await WaitForKeyFrame();
-            Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.F8, Keycode = Key.F8, Pressed = false });
+            Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.C, Keycode = Key.C, Pressed = false });
             await WaitForKeyFrame();
             if (i < 2)
             {
                 var legend = map.GetNode<Control>("%MapLegend");
-                Require(!LanguageSwitcher.IsBilingual && legend.Size.Y == 454, "F8 restores native legend height");
+                Require(!LanguageSwitcher.IsBilingual && legend.Size.Y == 454, "C restores native legend height");
                 foreach (var row in legend.GetNode<Control>("LegendItems").GetChildren().OfType<NMapLegendItem>())
                 {
-                    Require(row.Size.Y == 48 && row.GetNode<MegaLabel>("MegaLabel").Visible, "F8 restores native rows and labels");
+                    Require(row.Size.Y == 48 && row.GetNode<MegaLabel>("MegaLabel").Visible, "C restores native rows and labels");
                     Require(!row.GetNode<RichTextLabel>("BilingualLegendText").Visible, "Single-language mode hides bilingual text");
                 }
                 await Screenshot(i == 0 ? "english" : "japanese");
@@ -59,7 +59,7 @@ internal static class MapLegendSmokeTest
         await Settle();
         Require(first.GetNode<RichTextLabel>("BilingualLegendText").Text == before, "Repeated updates preserve text and font size");
         CheckLayout(map);
-        ModEntry.Logger.Info("MAP LEGEND PASS: six rows and header fit; F8 restores native layout; 16 languages in both positions, French/Korean, focus and repeated refresh");
+        ModEntry.Logger.Info("MAP LEGEND PASS: six rows and header fit; C restores native layout; 16 languages in both positions, French/Korean, focus and repeated refresh");
     }
 
     private static void CheckLayout(NMapScreen map)

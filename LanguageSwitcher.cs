@@ -50,17 +50,19 @@ internal static class LanguageSwitcher
         catch (Exception error)
         {
             ModEntry.Logger.Warn($"Could not restore display mode: {error}");
-            Overlay.ShowStatus("表示モードを復元できませんでした。F8 / F9で選び直せます", 7);
+            Overlay.ShowStatus("表示モードを復元できませんでした。C / Gで選び直せます", 7);
         }
-        if (!hasSavedMode) Overlay.ShowStatus("F7  長押しで翻訳   ·   F8  表示切り替え   ·   F9  言語設定", 7);
-        ModEntry.Logger.Info($"Language switcher ready: {Preferences.First} / {Preferences.Second}; F7 hold to peek, F8 toggle, F9 settings");
+        if (!hasSavedMode) Overlay.ShowStatus("Z  長押しで翻訳   ·   C  表示切り替え   ·   G  言語設定", 7);
+        ModEntry.Logger.Info($"Language switcher ready: {Preferences.First} / {Preferences.Second}; Z hold to peek, C toggle, G settings");
     }
 
     private static void ProcessInput()
     {
-        var toggle = Input.IsPhysicalKeyPressed(Key.F8);
-        var settings = Input.IsPhysicalKeyPressed(Key.F9);
-        var peek = Input.IsPhysicalKeyPressed(Key.F7);
+        var toggle = Input.IsPhysicalKeyPressed(Key.C);
+        var settings = Input.IsPhysicalKeyPressed(Key.G);
+        var peek = Input.IsPhysicalKeyPressed(Key.Z);
+        var modified = Input.IsKeyPressed(Key.Meta) || Input.IsKeyPressed(Key.Ctrl)
+            || Input.IsKeyPressed(Key.Alt) || Input.IsKeyPressed(Key.Shift);
         var previousToggle = _toggleDown;
         var previousSettings = _settingsDown;
         var previousPeek = _peekDown;
@@ -69,9 +71,10 @@ internal static class LanguageSwitcher
         _peekDown = peek;
         try
         {
+            // Track raw key edges above so releasing a modifier cannot trigger a held letter.
             // Release must restore the view even if a text field gained focus while held.
-            if (!peek || !_windowFocused) EndPeek();
-            if (!_windowFocused || NGame.Instance!.GetViewport().GuiGetFocusOwner() is LineEdit or TextEdit) return;
+            if (!peek || !_windowFocused || modified) EndPeek();
+            if (!_windowFocused || modified || NGame.Instance!.GetViewport().GuiGetFocusOwner() is LineEdit or TextEdit) return;
             if (settings && !previousSettings) { EndPeek(); Overlay.ToggleSettings(); }
             if (toggle && !previousToggle) Toggle();
             if (peek && !previousPeek && !toggle && !settings) BeginPeek();
@@ -150,7 +153,7 @@ internal static class LanguageSwitcher
         try { Patches.AncientBannerPatch.Refresh(); }
         catch (Exception error) { LiveText.Report(error); }
         var mode = bilingual ? $"{LanguageOverlay.LanguageName(Preferences.First)} ＋ {LanguageOverlay.LanguageName(Preferences.Second)}" : LanguageOverlay.LanguageName(language);
-        if (notify) Overlay.ShowStatus($"{mode}   ·   F7  長押し翻訳   F8  切り替え   F9  設定", 3);
+        if (notify) Overlay.ShowStatus($"{mode}   ·   Z  長押し翻訳   C  切り替え   G  設定", 3);
         if (save)
         {
             var savedMode = bilingual ? DisplayMode.Bilingual : language == Preferences.First

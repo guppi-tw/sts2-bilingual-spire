@@ -26,6 +26,22 @@ internal static class SmokeTest
             ParagraphSmokeTest.Run();
             if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_TEST_PHASE") is { } phase && phase != "full")
             {
+                if (phase == "shortcut-help")
+                {
+                    LanguageSwitcher.SwitchTo("eng");
+                    LanguageSwitcher.Overlay.ToggleSettings();
+                    await game.ToSignal(game.GetTree().CreateTimer(4), SceneTreeTimer.SignalName.Timeout);
+                    var panel = game.GetNode<Control>("BilingualSpire/LanguageControls/LanguageSettings");
+                    Require(panel.IsVisibleInTree() && game.GetViewportRect().Encloses(panel.GetGlobalRect()), "Shortcut settings fit on screen");
+                    if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_SCREENSHOT") is { } helpScreenshot)
+                    {
+                        RenderingServer.ForceDraw();
+                        Require(game.GetViewport().GetTexture().GetImage().SavePng(helpScreenshot) == Error.Ok, "Shortcut help screenshot saved");
+                    }
+                    ModEntry.Logger.Info("SMOKE TEST PASS: shortcut help layout (key input verified separately in hold phase)");
+                    game.GetTree().Quit(0);
+                    return;
+                }
                 if (phase == "hold")
                 {
                     await HoldTranslationSmokeTest.Run();
@@ -101,12 +117,12 @@ internal static class SmokeTest
             locked.UpdateVisuals(PileType.None, CardPreviewMode.Normal);
 
             LanguageSwitcher.SwitchTo("kor");
-            await KeyDown(Key.F8);
-            Require(LocManager.Instance.Language == "eng", "F8 switches to English");
+            await KeyDown(Key.C);
+            Require(LocManager.Instance.Language == "eng", "C switches to English");
             await Frame();
             await Frame();
-            Require(LocManager.Instance.Language == "eng", "Holding F8 does not repeat");
-            await KeyUp(Key.F8);
+            Require(LocManager.Instance.Language == "eng", "Holding C does not repeat");
+            await KeyUp(Key.C);
             CheckCards(cards);
             Require(cards[0].View.GetNode<MegaLabel>("%TitleLabel").Text == "Strike", "English replaces Japanese in the existing label");
             Require(menu == game.MainMenu, "Language switch preserves the current menu instance");
@@ -117,8 +133,8 @@ internal static class SmokeTest
             Require(!locked.GetNode<MegaLabel>("%TitleLabel").Text.Contains("Strike"), "Locked card stays hidden");
             Require(!locked.GetNode<MegaRichTextLabel>("%DescriptionLabel").Text.Contains('6'), "Locked description stays hidden");
 
-            await Press(Key.F8);
-            Require(LocManager.Instance.Language == "jpn", "F8 switches back to Japanese");
+            await Press(Key.C);
+            Require(LocManager.Instance.Language == "jpn", "C switches back to Japanese");
             CheckCards(cards);
             Require(cards[0].View.GetNode<MegaLabel>("%TitleLabel").Text == originalJapanese, "Round trip restores original title");
 
@@ -138,12 +154,12 @@ internal static class SmokeTest
             game.AddChild(snapshot);
             var preview = damage.PreviewValue;
             damage.PreviewValue = 99;
-            await Press(Key.F8);
+            await Press(Key.C);
             Require(snapshot.Text.Contains('9') && !snapshot.Text.Contains("99"), "Recorded damage is independent of later preview mutations");
             damage.PreviewValue = preview;
 
-            await Press(Key.F9);
-            Require(LanguageSwitcher.Overlay.SettingsVisible, "F9 opens language settings");
+            await Press(Key.G);
+            Require(LanguageSwitcher.Overlay.SettingsVisible, "G opens language settings");
             Require(LanguageSwitcher.Overlay.LanguageCount == LanguagePreferences.Languages.Length && LanguageSwitcher.Overlay.LanguageCount >= 16, "Game languages available in dropdowns");
             if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_SCREENSHOT") is { } screenshot)
             {
@@ -159,16 +175,16 @@ internal static class SmokeTest
                 RenderingServer.ForceDraw();
                 Require(game.GetViewport().GetTexture().GetImage().SavePng(screenshot) == Error.Ok, "Settings screenshot saved");
             }
-            await Press(Key.F9);
-            Require(!LanguageSwitcher.Overlay.SettingsVisible, "F9 closes language settings");
+            await Press(Key.G);
+            Require(!LanguageSwitcher.Overlay.SettingsVisible, "G closes language settings");
             LanguageSwitcher.SetPair("fra", "kor");
             Require(LanguagePreferences.Load().First == "fra" && LanguagePreferences.Load().Second == "kor", "Language pair saved and reloaded");
             LanguageSwitcher.SwitchTo("jpn");
-            await Press(Key.F8);
+            await Press(Key.C);
             Require(LocManager.Instance.Language == "fra", "Language outside pair switches to the first selection");
             CheckCards(cards);
 
-            await Press(Key.F8);
+            await Press(Key.C);
             Require(LocManager.Instance.Language == "kor", "Second chosen language can be Korean");
             CheckCards(cards);
 
@@ -181,12 +197,12 @@ internal static class SmokeTest
             var overwritten = examples[0].Label;
             overwritten.Text = "Player supplied text";
             LanguageSwitcher.SetPair("eng", "jpn");
-            await Press(Key.F8);
+            await Press(Key.C);
             Require(overwritten.Text == "Player supplied text", "Nonlocalized replacement is not translated");
             var editor = new LineEdit();
             game.AddChild(editor);
             editor.GrabFocus();
-            await Press(Key.F8);
+            await Press(Key.C);
             Require(LocManager.Instance.Language == "eng", "Shortcut ignored while entering text");
             editor.ReleaseFocus();
 
@@ -205,7 +221,7 @@ internal static class SmokeTest
             LanguageSwitcher.SetPair("eng", "jpn");
             LanguageSwitcher.ShowBilingual();
             Require(LanguagePreferences.Load().Mode == DisplayMode.Bilingual, "Bilingual display mode persisted for restart test");
-            ModEntry.Logger.Info($"SMOKE TEST PASS: {cards.Count} cards, upgrades, hidden cards, {changed} menu labels, event/relic/tooltips, real event layouts and story progression, F8/F9 three-mode cycle, bilingual updates, {LanguagePreferences.Languages.Length} languages, preferences and save isolation");
+            ModEntry.Logger.Info($"SMOKE TEST PASS: {cards.Count} cards, upgrades, hidden cards, {changed} menu labels, event/relic/tooltips, real event layouts and story progression, C/G three-mode cycle, bilingual updates, {LanguagePreferences.Languages.Length} languages, preferences and save isolation");
             game.GetTree().Quit(0);
         }
         catch (Exception error)
@@ -225,15 +241,15 @@ internal static class SmokeTest
         var readability = ReadabilityAudit.Capture(game);
         var english = cards.Select(c => (c.Model.Title, Description(c.Model))).ToArray();
         var englishEvent = examples[1].Source.GetFormattedText();
-        await Press(Key.F8);
+        await Press(Key.C);
         Require(LocManager.Instance.Language == "jpn" && !LanguageSwitcher.IsBilingual, "Cycle: first -> second");
         var japanese = cards.Select(c => (c.Model.Title, Description(c.Model))).ToArray();
         var japaneseEvent = examples[1].Source.GetFormattedText();
-        await KeyDown(Key.F8);
+        await KeyDown(Key.C);
         Require(LanguageSwitcher.IsBilingual && LocManager.Instance.Language == "eng", "Cycle: second -> bilingual with first as base");
         await Frame();
         Require(LanguageSwitcher.IsBilingual, "Held key keeps bilingual mode");
-        await KeyUp(Key.F8);
+        await KeyUp(Key.C);
         for (var i = 0; i < cards.Count; i++)
         {
             Require(cards[i].View.GetNode<MegaLabel>("%TitleLabel").Text == Both(english[i].Title, japanese[i].Title), $"{cards[i].Model.Id}: bilingual title in selected order");
@@ -294,7 +310,7 @@ internal static class SmokeTest
             foreach (var (_, view) in cards) view.Hide();
             scene.Show();
         }
-        await Press(Key.F8);
+        await Press(Key.C);
         Require(!LanguageSwitcher.IsBilingual && LocManager.Instance.Language == "eng", "Cycle: bilingual -> first");
         CheckCards(cards);
         Require(newLabel.Text == englishEvent, "Leaving bilingual mode removes second-language text");
@@ -341,9 +357,9 @@ internal static class SmokeTest
         view.UpdateVisuals(PileType.None, CardPreviewMode.Normal);
         var title = view.GetNode<MegaLabel>("%TitleLabel");
         Require(title.Text == "Strike", "First-launch card is in English");
-        await KeyDown(Key.F7);
-        Require(title.Text == "ストライク" && LanguageSwitcher.IsPeeking, "Default controls show Japanese while F7 is held");
-        await KeyUp(Key.F7);
+        await KeyDown(Key.Z);
+        Require(title.Text == "ストライク" && LanguageSwitcher.IsPeeking, "Default controls show Japanese while Z is held");
+        await KeyUp(Key.Z);
         await Frame();
         Require(title.Text == "Strike" && !LanguageSwitcher.IsPeeking, "Default controls return to English on release");
         Require(!File.Exists(LanguagePreferences.ConfigPath) && SaveManager.Instance.SettingsSave.Language == "jpn",
@@ -354,7 +370,7 @@ internal static class SmokeTest
         LanguageSwitcher.SetPair("eng", "jpn");
         view.QueueFree();
         await Frame();
-        ModEntry.Logger.Info("DEFAULT MODE PASS: first launch in English, hold F7 for Japanese, release to English; native settings unchanged");
+        ModEntry.Logger.Info("DEFAULT MODE PASS: first launch in English, hold Z for Japanese, release to English; native settings unchanged");
     }
 
     private static IEnumerable<Node> Descendants(Node node)
