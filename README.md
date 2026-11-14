@@ -5,6 +5,41 @@ SteamのMac版 **Slay the Spire 2** で、2つの言語を切り替えたり併�
 
 v0.5.0 / 動作確認済みのゲームバージョン: v0.113.0 / macOS Apple Silicon
 
+## ZIPから導入
+
+[BilingualSpire-v0.5.0-macOS.zip をダウンロード](https://github.com/guppi-tw/sts2-bilingual-spire/releases/download/v0.5.0/BilingualSpire-v0.5.0-macOS.zip)
+（[リリース一覧](https://github.com/guppi-tw/sts2-bilingual-spire/releases)）
+
+SteamのMac版Slay the Spire 2がインストールされていれば使えます。
+ビルド、.NET SDK、BaseLibの追加インストールは不要です。動作確認はゲームv0.113.0・Apple Siliconで行っています。
+
+1. ゲームを終了し、上のZIPをダウンロードして展開します。GitHubが自動で付ける `Source code (zip)` は導入用ではありません。
+2. SteamライブラリでSlay the Spire 2を右クリックし、「管理 → ローカルファイルを閲覧」を開きます。
+3. Finderで `SlayTheSpire2.app` を右クリックして「パッケージの内容を表示」を選び、`Contents → MacOS` を開きます。
+4. その中に `mods` フォルダを作ります。すでにある場合はそのフォルダを使います。
+5. ZIPから出てきた `BilingualSpire` フォルダを、丸ごと `mods` の中に入れます。配置後の構成は次のとおりです。
+
+```text
+SlayTheSpire2.app/
+  Contents/
+    MacOS/
+      mods/
+        BilingualSpire/
+          BilingualSpire.dll
+          BilingualSpire.json
+```
+
+6. Steamからゲームを起動し、「設定 → MOD設定」で「Bilingual Spire」を有効にします。再起動を求められた場合は再起動してください。
+7. F8で表示モード、F9で言語の組み合わせを変更できます。Macで反応しない場合は **fn + F8 / fn + F9** を使います。
+
+MOD有効時の進行状況は通常プレイと別に保存されます。初めてMODを使う場合は、
+`~/Library/Application Support/SlayTheSpire2/` をバックアップしてから起動してください。
+通常プレイの進行が表示されなくても、元のセーブが消えたわけではありません。このMODは進行データの移行を行いません。
+
+更新時はゲームを終了し、`mods/BilingualSpire` を新しいZIP内の同名フォルダに置き換えます。
+言語や表示モードの設定は別の場所に保存されているため引き継がれます。
+無効にする場合はMOD設定でオフにして再起動します。アンインストールする場合はゲーム終了後に `mods/BilingualSpire` を取り除きます。
+
 ## 使い方
 
 | 操作 | 動作 |
@@ -29,8 +64,9 @@ Macで反応しない場合は **fn + F8 / fn + F9** を使ってください。
 MODの設定ファイルは `~/Library/Application Support/SlayTheSpire2/mod_configs/BilingualSpire.json` に保存されます。
 表示モードが未保存の場合は、本体の設定言語で起動します。
 
-## ビルドと導入
+## ソースからビルド
 
+開発する場合や自分でビルドする場合の手順です。通常の導入は上のZIPを使ってください。
 必要なものは、SteamでインストールしたMac版Slay the Spire 2と.NET 9 SDKです。
 検証に使用したSDKは9.0.321で、使用するバージョンは [global.json](global.json) に指定しています。
 このMODはDLLとJSONで動作し、BaseLib・PCK・MegaDotエディターは不要です。
@@ -68,9 +104,6 @@ cd sts2-bilingual-spire
 Intel Mac用の参照先は `Sts2Architecture` を `x86_64` にして指定できますが、動作確認はApple Siliconのみです。
 付属の起動・テストスクリプトはmacOSの標準Steam配置を対象とします。
 ゲームのDLLはインストール先から参照し、このリポジトリには含めません。
-
-MOD有効時の進行状況は通常プレイと別に保存されます。このMODは進行データの移行を行いません。
-初めてMODを使う場合は、既存のセーブをバックアップしてから起動してください。
 
 読み込みを確認するには次を実行します。
 
