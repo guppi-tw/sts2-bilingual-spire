@@ -24,6 +24,13 @@ internal static class SmokeTest
             ParagraphSmokeTest.Run();
             if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_TEST_PHASE") is { } phase && phase != "full")
             {
+                if (phase == "neow")
+                {
+                    await NeowProgressionSmokeTest.Run();
+                    ModEntry.Logger.Info("SMOKE TEST PASS: Neow reward and map progression");
+                    game.GetTree().Quit(0);
+                    return;
+                }
                 if (phase == "story")
                 {
                     await StorySmokeTest.Run();

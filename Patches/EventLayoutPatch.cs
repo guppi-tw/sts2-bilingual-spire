@@ -137,8 +137,10 @@ internal static class EventLayoutPatch
         var options = layout.GetNode<VBoxContainer>("%OptionsContainer");
         var index = (int)AccessTools.Field(typeof(NAncientEventLayout), "_currentDialogueLine").GetValue(layout)!;
         var line = dialogue.GetChildOrNull<Control>(index);
-        var height = line is null ? dialogue.Size.Y : line.Position.Y + line.Size.Y;
-        if (index >= dialogue.GetChildCount() - 1) height += options.Size.Y + 10;
+        var height = line is null ? 0 : dialogue.Position.Y + line.Position.Y + line.Size.Y;
+        // The bottom-aligned content keeps its height after dialogue is cleared.
+        // Use the options' actual bottom so the completed event's Proceed stays inside the viewport.
+        if (index >= dialogue.GetChildCount() - 1) height = options.Position.Y + options.Size.Y + 10;
         var tweenField = AccessTools.Field(typeof(NAncientEventLayout), "_contentTween");
         if (tweenField.GetValue(layout) is Tween tween)
         {

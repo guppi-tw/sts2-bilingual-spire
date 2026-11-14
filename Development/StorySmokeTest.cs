@@ -26,6 +26,7 @@ internal static class StorySmokeTest
         var state = RunState.CreateForTest([player], seed: "BILINGUALSTORY");
         RunManager.Instance.SetUpTest(state, network, shouldSave: false);
         RunManager.Instance.Launch();
+        RunManager.Instance.GenerateRooms();
         var run = NRun.Create(state);
         game.RootSceneContainer.SetCurrentScene(run);
         try

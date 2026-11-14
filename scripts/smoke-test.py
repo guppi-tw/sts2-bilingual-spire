@@ -51,7 +51,7 @@ try:
     env.pop("SteamAppId", None)
     env.pop("SteamGameId", None)
     selected_phase = os.environ.get("BILINGUAL_SPIRE_TEST_PHASE", "full")
-    phases = ["full", "resume-bilingual", "resume-first", "resume-second"] if selected_phase == "full" else [selected_phase]
+    phases = ["full", "neow", "resume-bilingual", "resume-first", "resume-second"] if selected_phase == "full" else [selected_phase]
     for index, phase in enumerate(phases):
         name = "bilingual-smoke" if index == 0 else phase
         log_file = artifacts / f"{name}.log"
@@ -63,7 +63,7 @@ try:
             (settings_dir / "settings.save").write_text(json.dumps(settings))
         args = [str(game), "--force-steam", "off", "--max-fps", "60",
                 "--quit-after", "3600", "--log-file", str(log_file)]
-        if options.visual and index == 0:
+        if options.visual and (index == 0 or phase == "neow"):
             args += ["--windowed", "--resolution", "1280x720"]
             phase_env["BILINGUAL_SPIRE_SCREENSHOT"] = str(artifacts / "language-settings.png")
             settings["fullscreen"] = False
@@ -76,9 +76,9 @@ try:
         text = log_file.read_text(errors="replace") if log_file.exists() else ""
         print(f"{phase}: game exit code {result.returncode}", flush=True)
         for line in text.splitlines():
-            if any(marker in line for marker in ("SMOKE TEST", "STORY PASS", "PARAGRAPH PASS", "GAME LANGUAGE PASS")):
+            if any(marker in line for marker in ("SMOKE TEST", "STORY PASS", "PARAGRAPH PASS", "GAME LANGUAGE PASS", "NEOW PROGRESSION PASS")):
                 print(line, flush=True)
-        if (result.returncode != 0 or "SMOKE TEST PASS:" not in text or "SMOKE TEST FAIL:" in text
+        if (result.returncode != 0 or "SMOKE TEST PASS:" not in text or "[ERROR]" in text or "ERROR: System." in text
                 or "Steam initialization skipped" not in text or "Steamworks initialization succeeded" in text):
             raise RuntimeError(f"FAIL {phase}: see {log_file}")
 finally:
