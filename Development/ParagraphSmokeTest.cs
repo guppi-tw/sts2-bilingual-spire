@@ -21,6 +21,9 @@ internal static class ParagraphSmokeTest
             "[table=1][cell]A\n\nB[/cell][/table]\n[table=1][cell]あ\n\nい[/cell][/table]");
         Check("[b]One\n\nTwo", "一\n\n二", "[b]One\n\nTwo\n一\n\n二");
         Check("Same\n\nSame", "Same\n\nSame", "Same\n\nSame");
+        var styled = ParagraphText.Combine("[center]One\n\nTwo[/center]", "[center]一\n\n二[/center]", secondaryFontSize: 17);
+        if (styled != "[center]One[/center]\n[font_size=17][center]一[/center][/font_size]\n\n[center]Two[/center]\n[font_size=17][center]二[/center][/font_size]")
+            throw new InvalidOperationException("Secondary size must wrap each translated paragraph without affecting the primary text");
         ModEntry.Logger.Info("PARAGRAPH PASS: paragraph order, line breaks, formatting, duplicates and safe fallback");
     }
 

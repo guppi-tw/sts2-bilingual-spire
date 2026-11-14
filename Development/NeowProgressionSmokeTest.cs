@@ -75,6 +75,7 @@ internal static class NeowProgressionSmokeTest
             await Settle(0.6);
             Require(run.GlobalUi.MapScreen.IsOpen && run.GlobalUi.MapScreen.IsTravelEnabled, "Proceed opens the map and enables travel");
             await Screenshot("neow-map");
+            await MapLegendSmokeTest.Run(run.GlobalUi.MapScreen);
             run.GlobalUi.MapScreen.Close(animateOut: false);
             var resumedRoom = new EventRoom(ModelDb.Event<Neow>());
             resumedRoom.MarkPreFinished();

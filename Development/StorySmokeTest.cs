@@ -45,6 +45,7 @@ internal static class StorySmokeTest
                     Require(layout is not null && layout.OptionButtons.Any(), $"{model.Id}: actual event layout initialized");
                     var labels = Descendants(layout!).OfType<Control>().Where(c => c is MegaLabel or MegaRichTextLabel)
                         .Where(c => !string.IsNullOrWhiteSpace(LiveText.GetText(c))).ToArray();
+                    var optionGeometry = EventOptionSmokeTest.Capture(layout!);
                     var english = labels.ToDictionary(c => c, c => LiveText.GetText(c)!);
                     LanguageSwitcher.SwitchTo("jpn");
                     await Settle(0.1);
@@ -54,11 +55,23 @@ internal static class StorySmokeTest
                     LanguageSwitcher.ShowBilingual();
                     await Settle(0.15);
                     foreach (var label in changed)
-                        Require(LiveText.GetText(label) == LiveText.Combine(english[label], japanese[label], label is RichTextLabel), $"{model.Id}/{label.Name}: both complete translations in paragraph order");
+                        Require(SecondaryTextSmokeTest.WithoutSize(LiveText.GetText(label)!) == LiveText.Combine(english[label], japanese[label], label is RichTextLabel), $"{model.Id}/{label.Name}: both complete translations in paragraph order");
                     CheckLayout(model.Id.Entry, layout!);
                     await Screenshot(model.Id.Entry.ToLowerInvariant());
+                    EventOptionSmokeTest.Check(optionGeometry);
+                    if (layout!.OptionButtons.FirstOrDefault(b => !b.Option.IsLocked) is { } hover)
+                    {
+                        hover.Call("OnFocus");
+                        await Settle(0.1);
+                        EventOptionSmokeTest.Check(optionGeometry);
+                        EventOptionSmokeTest.CheckFocused(hover);
+                        await Screenshot(model.Id.Entry.ToLowerInvariant() + "-hover");
+                        hover.Call("OnUnfocus");
+                        await Settle(0.55);
+                    }
                     if (layout!.GetNodeOrNull<MegaRichTextLabel>("%EventDescription")?.GetParent() is ScrollContainer scroll)
                     {
+                        Require(scroll.GetThemeStylebox("panel") is StyleBoxEmpty, "Story keeps the original game background");
                         Require(scroll.Size.Y > 120, "Story keeps a readable scroll area");
                         scroll.ScrollVertical = int.MaxValue;
                         await Settle(0.1);
@@ -84,6 +97,7 @@ internal static class StorySmokeTest
                     await Settle(0.1);
                     foreach (var label in changed)
                         Require(LiveText.GetText(label) == english[label], $"{model.Id}/{label.Name}: single-language round trip");
+                    EventOptionSmokeTest.Check(optionGeometry);
                     Require(room.Layout == layout, "Language change kept the event and choice state intact");
                     ModEntry.Logger.Info($"STORY PASS {model.Id.Entry}: {changed.Length} translated labels, {layout!.OptionButtons.Count()} options, layout checked");
                     if (model is DollRoom)
@@ -96,7 +110,7 @@ internal static class StorySmokeTest
                         var description = layout.GetNode<MegaRichTextLabel>("%EventDescription");
                         var firstText = model.Description.GetFormattedText();
                         var secondText = ScopedLocale.Render("jpn", model.Description.GetFormattedText);
-                        Require(description.Text == LiveText.Combine(firstText, secondText) && description.VisibleRatio == 1, "New story page reveals both complete translations");
+                        Require(SecondaryTextSmokeTest.WithoutSize(description.Text) == LiveText.Combine(firstText, secondText) && description.VisibleRatio == 1, "New story page reveals both complete translations");
                         CheckLayout("DOLL_ROOM/next-page", layout);
                         await Screenshot("doll_room-next-page");
                         ModEntry.Logger.Info("STORY PASS DOLL_ROOM: actual choice advanced the story with bilingual text");
@@ -143,6 +157,7 @@ internal static class StorySmokeTest
     {
         foreach (var label in Descendants(layout).OfType<MegaRichTextLabel>().Where(l => l.IsVisibleInTree() && !string.IsNullOrWhiteSpace(l.Text)))
         {
+            if (LanguageSwitcher.IsBilingual && label.Text.Contains("[font_size=")) SecondaryTextSmokeTest.Check(label);
             var height = label.GetContentHeight();
             ModEntry.Logger.Info($"STORY LAYOUT {name}/{label.Name}: content={height}, box={label.Size}, font={label.GetThemeFontSize("normal_font_size")}, fit={label.FitContent}");
             Require(height <= label.Size.Y + 3, $"{name}/{label.Name}: text clipped vertically ({height} > {label.Size.Y})");

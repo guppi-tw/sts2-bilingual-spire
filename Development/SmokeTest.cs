@@ -217,7 +217,7 @@ internal static class SmokeTest
         for (var i = 0; i < cards.Count; i++)
         {
             Require(cards[i].View.GetNode<MegaLabel>("%TitleLabel").Text == Both(english[i].Title, japanese[i].Title), $"{cards[i].Model.Id}: bilingual title in selected order");
-            Require(cards[i].View.GetNode<MegaRichTextLabel>("%DescriptionLabel").Text == Both(english[i].Item2, japanese[i].Item2), $"{cards[i].Model.Id}: full bilingual description and punctuation");
+            Require(SecondaryTextSmokeTest.WithoutSize(cards[i].View.GetNode<MegaRichTextLabel>("%DescriptionLabel").Text) == Both(english[i].Item2, japanese[i].Item2), $"{cards[i].Model.Id}: full bilingual description and punctuation");
         }
         Require(examples[1].Label.Text == Both(englishEvent, japaneseEvent), "Existing non-card text becomes bilingual");
         var newLabel = new Label { Text = examples[1].Source.GetFormattedText() };
@@ -228,10 +228,12 @@ internal static class SmokeTest
         var newView = NCard.Create(cards[2].Model)!;
         game.AddChild(newView);
         newView.UpdateVisuals(PileType.None, CardPreviewMode.Normal);
-        Require(newView.GetNode<MegaRichTextLabel>("%DescriptionLabel").Text == Both(english[2].Item2, japanese[2].Item2), "New card is bilingual");
+        Require(SecondaryTextSmokeTest.WithoutSize(newView.GetNode<MegaRichTextLabel>("%DescriptionLabel").Text) == Both(english[2].Item2, japanese[2].Item2), "New card is bilingual");
         Require(newView.GetNode<MegaLabel>("%TitleLabel").GetThemeFont("font").HasChar('ス'), "Combined font includes Japanese glyphs");
         await Frame();
         await Frame();
+        foreach (var (_, view) in cards) SecondaryTextSmokeTest.Check(view.GetNode<MegaRichTextLabel>("%DescriptionLabel"));
+        SecondaryTextSmokeTest.Check(newView.GetNode<MegaRichTextLabel>("%DescriptionLabel"));
         var typeLabel = newView.GetNode<MegaLabel>("%TypeLabel");
         var plaque = newView.GetNode<Control>("%TypePlaque");
         Require(Math.Abs(typeLabel.GetGlobalRect().GetCenter().X - plaque.GetGlobalRect().GetCenter().X) < 2, "Bilingual card type stays centered on its plaque");

@@ -21,7 +21,10 @@ internal static class EventLayoutPatch
         internal bool Pending;
         internal bool WasBilingual;
     }
-    private sealed record OptionSize(Vector2 Minimum, Control TextArea, float BottomAnchor, float BottomOffset);
+    private sealed record GraphicSize(NinePatchRect Node, float TopAnchor, float BottomAnchor,
+        float TopOffset, float BottomOffset, float TopInset, float BottomInset, Vector2 Pivot);
+    private sealed record OptionSize(Vector2 Minimum, Control TextArea, float BottomAnchor, float BottomOffset,
+        float Height, Vector2 Pivot, GraphicSize[] Graphics);
     private static readonly ConditionalWeakTable<NEventLayout, State> Layouts = new();
     private static readonly ConditionalWeakTable<NEventOptionButton, OptionSize> Options = new();
 
@@ -61,12 +64,27 @@ internal static class EventLayoutPatch
         {
             var label = button.GetNode<MegaRichTextLabel>("%Text");
             var textArea = label.GetParent() is HBoxContainer row ? (Control)row : label;
-            var original = Options.GetValue(button, b => new(b.CustomMinimumSize, textArea, textArea.AnchorBottom, textArea.OffsetBottom));
+            var original = Options.GetValue(button, b => new(b.CustomMinimumSize, textArea, textArea.AnchorBottom, textArea.OffsetBottom,
+                b.Size.Y, b.PivotOffset, b.GetChildren().OfType<NinePatchRect>().Select(graphic => new GraphicSize(graphic,
+                    graphic.AnchorTop, graphic.AnchorBottom, graphic.OffsetTop, graphic.OffsetBottom,
+                    graphic.Position.Y, graphic.Position.Y + graphic.Size.Y - b.Size.Y, graphic.PivotOffset)).ToArray()));
             button.CustomMinimumSize = bilingual
                 ? new Vector2(original.Minimum.X, buttons.Length <= 3 ? 156 : 124)
                 : original.Minimum;
             original.TextArea.AnchorBottom = bilingual ? 1 : original.BottomAnchor;
             original.TextArea.OffsetBottom = bilingual ? -13 : original.BottomOffset;
+            var extraHeight = bilingual ? button.CustomMinimumSize.Y - original.Height : 0;
+            button.PivotOffset = original.Pivot + new Vector2(0, extraHeight / 2);
+            foreach (var graphic in original.Graphics)
+            {
+                // Native glow and shadow nodes are anchored to the center at a fixed height.
+                // Preserve their margins while making them follow the expanded button.
+                graphic.Node.AnchorTop = bilingual ? 0 : graphic.TopAnchor;
+                graphic.Node.AnchorBottom = bilingual ? 1 : graphic.BottomAnchor;
+                graphic.Node.OffsetTop = bilingual ? graphic.TopInset : graphic.TopOffset;
+                graphic.Node.OffsetBottom = bilingual ? graphic.BottomInset : graphic.BottomOffset;
+                graphic.Node.PivotOffset = graphic.Pivot + new Vector2(0, extraHeight / 2);
+            }
         }
         if (layout is NAncientEventLayout ancient)
         {
@@ -94,7 +112,7 @@ internal static class EventLayoutPatch
                     SizeFlagsVertical = Control.SizeFlags.ExpandFill, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
                     FollowFocus = true
                 };
-                state.Scroll.AddThemeStyleboxOverride("panel", UI.ModStyles.Panel());
+                state.Scroll.AddThemeStyleboxOverride("panel", new StyleBoxEmpty());
                 column.AddChild(state.Scroll);
                 column.MoveChild(state.Scroll, state.OriginalIndex);
                 description.Reparent(state.Scroll);

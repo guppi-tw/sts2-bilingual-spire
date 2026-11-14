@@ -9,15 +9,17 @@ internal static class ParagraphText
     private static readonly HashSet<string> Standalone = new(StringComparer.OrdinalIgnoreCase) { "lb", "rb", "br", "hr" };
     private static readonly HashSet<string> Structural = new(StringComparer.OrdinalIgnoreCase) { "img", "table", "cell", "ul", "ol" };
 
-    internal static string Combine(string first, string second, bool richText = true)
+    internal static string Combine(string first, string second, bool richText = true, int? secondaryFontSize = null)
     {
         if (first == second) return first;
+        string Style(string text) => richText && secondaryFontSize is { } size
+            ? $"[font_size={size}]{text}[/font_size]" : text;
         var a = Split(first, richText);
         var b = Split(second, richText);
         // Official translations sometimes merge or split paragraphs; don't invent a correspondence.
-        if (a is null || b is null || a.Length < 2 || a.Length != b.Length) return first + "\n" + second;
+        if (a is null || b is null || a.Length < 2 || a.Length != b.Length) return first + "\n" + Style(second);
         return string.Join("\n\n", a.Zip(b, (original, translation) => original == translation
-            ? original : original + "\n" + translation));
+            ? original : original + "\n" + Style(translation)));
     }
 
     private static string[]? Split(string text, bool richText)

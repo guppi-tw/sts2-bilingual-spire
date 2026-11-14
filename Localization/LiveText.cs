@@ -87,13 +87,28 @@ internal static class LiveText
 
     internal static string Combine(string first, string second, bool richText = true) => ParagraphText.Combine(first, second, richText);
 
+    internal static string CombineFor(Control control, string first, string second) => ParagraphText.Combine(first, second,
+        control is RichTextLabel, SecondaryTextStyle.AppliesTo(control) ? SecondaryTextStyle.FontSize(control) : null);
+
+    internal static void RefreshControl(Control control)
+    {
+        if (!Bindings.TryGetValue(control, out var binding) || GetText(control) != binding.LastText) return;
+        var wasRendering = _rendering;
+        _rendering = true;
+        try
+        {
+            if (Render(control, binding.Recipe) != binding.LastText) Apply(control, binding);
+        }
+        finally { _rendering = wasRendering; }
+    }
+
     private static string Render(Control control, TextRecipe recipe)
     {
         if (!LanguageSwitcher.IsBilingual) return recipe.Render();
         var first = ScopedLocale.Render(LanguageSwitcher.Preferences.First, recipe.Render);
         var second = ScopedLocale.Render(LanguageSwitcher.Preferences.Second, recipe.Render);
         if (first == second) return first;
-        return control.Name == "TypeLabel" ? $"{first} / {second}" : Combine(first, second, control is RichTextLabel);
+        return control.Name == "TypeLabel" ? $"{first} / {second}" : CombineFor(control, first, second);
     }
 
     private static void Apply(Control control, Binding binding)

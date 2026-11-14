@@ -87,6 +87,7 @@ internal static class LanguageSwitcher
         var updated = LiveText.Refresh();
         Patches.CardRefreshPatch.Refresh();
         Patches.EventLayoutPatch.Refresh();
+        Patches.MapLegendPatch.Refresh();
         try { Patches.AncientBannerPatch.Refresh(); }
         catch (Exception error) { LiveText.Report(error); }
         var mode = bilingual ? $"{LanguageOverlay.LanguageName(Preferences.First)} ＋ {LanguageOverlay.LanguageName(Preferences.Second)}" : LanguageOverlay.LanguageName(language);
