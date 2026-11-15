@@ -4,7 +4,20 @@ SteamのMac版 **Slay the Spire 2** で、2つの言語を切り替えたり併�
 初期状態は学習する言語で表示し、Zを押している間だけ母国語を確認できます。
 ゲーム収録の公式翻訳を利用し、外部の翻訳APIは使いません。
 
-v0.5.7 / 動作確認済みのゲームバージョン: v0.113.0 / macOS Apple Silicon
+v0.5.7 / 動作確認済み: public-beta のゲームv0.113.0 / macOS Apple Silicon
+
+## Steamワークショップから導入
+
+[Bilingual Spireをサブスクライブ](https://steamcommunity.com/sharedfiles/filedetails/?id=3840138909)
+
+1. Steamのゲームの「プロパティ → ゲームのバージョンとベータ」で `public-beta` を選びます。通常ブランチ・Windows・Linuxは未検証です。
+2. 上のWorkshopページでサブスクライブし、Steamのダウンロード完了を待ちます。
+3. ゲームを起動し、「設定 → MOD設定」でBilingual Spireを有効にします。再起動を求められた場合は再起動してください。
+4. Zを押している間だけ翻訳、Cで表示モード切り替え、Gで言語設定を使えます。
+
+ZIP版から移る場合は、ゲームを終了して手動配置した `mods/BilingualSpire` フォルダを `mods` の外へ移してください。同じバージョンの手動配置版が残ると、ゲームはそちらを優先します。言語設定やMOD用の進行データは引き継がれます。
+
+更新はSteamが配信します。MOD有効時の進行は通常プレイと別に保存されます。このMODはセーブの移行や削除を行いません。
 
 ## ZIPから導入
 
@@ -209,6 +222,7 @@ python3 scripts/smoke-test.py --visual
 - [MODのセットアップ](https://github.com/Alchyr/ModTemplate-StS2/wiki/Setup)
 - [MODファイルの構成](https://github.com/Alchyr/ModTemplate-StS2/wiki/Modding-Basics)
 - [MegaDot公式配布](https://megadot.megacrit.com/)
+- [Workshopの配布ファイルと更新手順](workshop/README.md)
 
 インストール済みゲームの公開XMLドキュメントとILSpyでAPIを確認できます。
 ローカルツールのILSpyは `dotnet tool restore` で準備し、`dotnet ilspycmd` で利用します。

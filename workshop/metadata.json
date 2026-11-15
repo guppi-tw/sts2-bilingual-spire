@@ -1,0 +1,8 @@
+{
+  "title": "Bilingual Spire",
+  "tags": ["QoL", "Utility", "English", "Japanese"],
+  "dependencies": [],
+  "contentDescriptors": [],
+  "minBranch": "public-beta",
+  "maxBranch": "public-beta"
+}
