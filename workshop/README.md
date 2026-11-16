@@ -7,8 +7,17 @@
 - `item-id.txt`：既存のWorkshop項目ID。更新時も同じ項目を使います。
 - `image.png`：512 × 512、1MB未満のサムネイル。
 - `image-prompt.md`：画像の生成条件。
+- `demo-video.json`：Workshopに掲載したYouTube動画のIDと撮影環境。
 
 配布内容はGitHub ReleasesのDLL・JSONと同一です。ゲーム本体のDLL、セーブ、ログ、開発用テストはアップロードしません。
+
+## デモ動画
+
+[23秒の操作デモ](https://youtu.be/8r27ElXnP6M)をYouTubeで限定公開し、Workshopの動画プレビューに登録しています。Zの長押しと解除、Cでの併記、カードにカーソルを合わせたときの大きな対訳を紹介しています。実ゲームをテスト用データと自動入力で動かし、操作説明を動画用に追加しました。
+
+録画する場合はゲームを終了してから `python3 scripts/record-demo.py` を実行します。.NET SDKとffmpegが必要です。既存のセーブを分離・復元し、撮影用MODも終了時に元へ戻します。出力は `.artifacts/demo/BilingualSpire-demo.mp4` です。YouTubeやSteamへの投稿は行いません。
+
+公式アップローダーv0.2.0は、作業フォルダの `previews` にない追加プレビューを更新時に削除します。MODを更新した後は、Workshopの「画像と動画を追加／編集」から上記YouTube動画を再登録してください。Steamworks APIを使う場合は、同じ項目IDに対して `AddItemPreviewVideo` と `SubmitItemUpdate` を呼びます。重複登録を避けるため、事前に既存の動画IDを確認してください。
 
 ## 更新手順
 

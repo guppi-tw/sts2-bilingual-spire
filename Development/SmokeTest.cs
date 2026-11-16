@@ -26,6 +26,13 @@ internal static class SmokeTest
             ParagraphSmokeTest.Run();
             if (System.Environment.GetEnvironmentVariable("BILINGUAL_SPIRE_TEST_PHASE") is { } phase && phase != "full")
             {
+                if (phase == "demo")
+                {
+                    await DemoRecording.Run();
+                    ModEntry.Logger.Info("SMOKE TEST PASS: recorded live translation demonstration");
+                    game.GetTree().Quit(0);
+                    return;
+                }
                 if (phase == "shortcut-help")
                 {
                     LanguageSwitcher.SwitchTo("eng");

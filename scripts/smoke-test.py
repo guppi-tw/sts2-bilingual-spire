@@ -12,7 +12,12 @@ import tempfile
 root = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--visual", action="store_true", help="Capture menus, cards and event layouts in an isolated test game")
+parser.add_argument("--record-demo", type=Path, help="Record the automated game demo to an AVI file")
 options = parser.parse_args()
+if options.record_demo:
+    options.record_demo = options.record_demo.resolve()
+    options.record_demo.parent.mkdir(parents=True, exist_ok=True)
+    options.visual = True
 game = Path.home() / "Library/Application Support/Steam/steamapps/common/Slay the Spire 2/SlayTheSpire2.app/Contents/MacOS/Slay the Spire 2"
 if subprocess.run(["pgrep", "-f", str(game)], capture_output=True).returncode == 0:
     sys.exit("Close Slay the Spire 2 before running this test.")
@@ -50,7 +55,7 @@ try:
                BILINGUAL_SPIRE_CONFIG_PATH=str(test_dir / "language-settings.json"))
     env.pop("SteamAppId", None)
     env.pop("SteamGameId", None)
-    selected_phase = os.environ.get("BILINGUAL_SPIRE_TEST_PHASE", "full")
+    selected_phase = "demo" if options.record_demo else os.environ.get("BILINGUAL_SPIRE_TEST_PHASE", "full")
     phases = ["full", "neow", "readability", "hold", "resume-bilingual", "resume-first", "resume-second"] if selected_phase == "full" else [selected_phase]
     for index, phase in enumerate(phases):
         name = "bilingual-smoke" if index == 0 else phase
@@ -70,9 +75,12 @@ try:
             (settings_dir / "settings.save").write_text(json.dumps(settings))
         else:
             args += ["--headless"]
+        if options.record_demo:
+            args += ["--write-movie", str(options.record_demo), "--fixed-fps", "30", "--disable-vsync"]
+            phase_env["BILINGUAL_SPIRE_DEMO_TIMING"] = str(options.record_demo.with_suffix(".json"))
         with (artifacts / f"{name}-console.log").open("w") as console:
             result = subprocess.run(args, cwd=game.parent, env=phase_env, stdout=console,
-                                    stderr=subprocess.STDOUT, timeout=60)
+                                    stderr=subprocess.STDOUT, timeout=240 if options.record_demo else 60)
         text = log_file.read_text(errors="replace") if log_file.exists() else ""
         print(f"{phase}: game exit code {result.returncode}", flush=True)
         for line in text.splitlines():
